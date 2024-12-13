@@ -1,24 +1,12 @@
 using backend.Helpers;
+using backend.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// JWT Authentication Middleware
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidIssuer = "backend",
-            ValidAudience = "backend",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtHelper.SecretKey))
-        };
-    });
+builder.Services.AddJwtAuthentication("Sizin128BitlikSecretKey");
 
 builder.Services.AddControllers();
 var app = builder.Build();
