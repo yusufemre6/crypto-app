@@ -12,7 +12,9 @@ namespace backend.Services
 
         public async Task StartAsync(Func<string, Task> sendToFrontend)
         {
+
             _okxSocket = new ClientWebSocket();
+            
             await _okxSocket.ConnectAsync(new Uri(OKXWebSocketUrl), CancellationToken.None);
 
             var subscribeMessage = new

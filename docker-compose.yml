@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend  # Frontend Dockerfile'ının olduğu dizin
+    ports:
+      - "5173:80"  # Frontend uygulaması, 80 portunu 3000'e yönlendirecek
+    depends_on:
+      - backend  # Backend'e bağımlıdır, önce backend başlatılacak
+
+  backend:
+    build:
+      context: ./backend  # Backend Dockerfile'ının olduğu dizin
+    ports:
+      - "5242:80"  # Backend API, 5000 portu üzerinden erişilecek
+    environment:
+      - ASPNETCORE_URLS=http://+:80  # Uygulamanın tüm IP'lerden dinlemesi için
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

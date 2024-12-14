@@ -23,7 +23,6 @@ namespace backend.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                Console.WriteLine("WebSocket bağlantısı kabul edildi.");
 
                 await _webSocketService.StartAsync(async (data) =>
                 {

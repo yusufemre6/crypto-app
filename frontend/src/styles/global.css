@@ -13,7 +13,7 @@
 /* Başlık */
 h2 {
   font-size: 24px;
-  color: #333;
+  color: white;
   margin-bottom: 20px;
   font-weight: 600;
 }
@@ -55,6 +55,12 @@ button:hover {
 /* Success ve Error mesajları */
 p {
   font-size: 14px;
+  color: white;
+}
+
+label{
+  color: white;
+  font-size: 16px;
 }
 
 .success {
