@@ -19,8 +19,6 @@ const Login = () => {
         password
       });
 
-      console.log(response.data);
-
       // JWT token'ı localStorage'a kaydet
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
@@ -37,8 +35,8 @@ const Login = () => {
   return (
     <div>
       <HeaderBar></HeaderBar>
-      <h2>Giriş Yap</h2>
       <form onSubmit={handleSubmit}>
+        <h2>Giriş Yap</h2>
         <div>
           <label>Username:</label>
           <input

@@ -31,8 +31,8 @@ const Register = () => {
   return (
     <div>
       <HeaderBar></HeaderBar>  
-      <h2>Kayıt Ol</h2>
       <form onSubmit={handleSubmit}>
+        <h2>Kayıt Ol</h2>
         <div>
           <label>Username:</label>
           <input 
