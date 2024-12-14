@@ -1,7 +1,6 @@
 using backend.Helpers;
 using backend.Middlewares;
 using backend.Services;
-using backend.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -17,20 +16,26 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost",
         builder => builder
-            .WithOrigins("http://localhost:5173")  // Frontend uygulamanızın URL'sini buraya yazın
+            .WithOrigins("http://localhost:5173")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
 });
 
 builder.Services.AddJwtAuthentication("Sizin128BitlikSecretKey");
-
-builder.Services.AddSingleton<OKXWebSocketService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSingleton<WebSocketService>();
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 var app = builder.Build();
-app.MapHub<MarketHub>("/markethub");
+
+// Enable WebSocket
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+app.UseWebSockets(webSocketOptions);
 
 app.UseAuthentication();
 app.UseAuthorization();

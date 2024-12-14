@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../utils/axiosInstance';
 import HeaderBar from "../components/Header";
 import "../styles/global.css";
 
@@ -14,8 +14,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Backend'e login isteği gönder
-      const response = await axios.post('http://localhost:5242/api/auth/login', {
+      const response = await axiosInstance.post('/auth/login', {
         username,
         password
       });
@@ -25,6 +24,7 @@ const Login = () => {
         localStorage.setItem('token', response.data.token);
         setSuccess('Giriş başarılı!');
         setError('');
+        navigate('/'); // Girişten sonra ana sayfaya yönlendirme
       }
     } catch (error) {
       setError('Giriş yapılırken bir hata oluştu.');

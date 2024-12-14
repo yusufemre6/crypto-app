@@ -1,42 +1,36 @@
 import React, { createContext, useEffect, useState } from "react";
 
-export const WebSocketContext = createContext();
+const WebSocketContext = createContext();
 
-export const WebSocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
+const WebSocketProvider = ({ children }) => {
   const [data, setData] = useState([]);
-
+  
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:5242/marketHub"); // Backend WebSocket URL
+    const socket = new WebSocket("ws://localhost:5242/marketHub"); // Backend WebSocket endpoint
+    console.log("WebSocket bağlantısı kuruluyor...");
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
+    socket.onmessage = (event) => {
+      try {
+        const parsedData = JSON.parse(event.data);
+        setData((prevData) => [...prevData, parsedData]); // Gelen veriyi state'e ekle
+      } catch (error) {
+        console.error("Gelen veri çözülemedi:", error);
+      }
     };
 
-    ws.onmessage = (event) => {
-      const parsedData = JSON.parse(event.data);
-      setData((prevData) => [...parsedData]);
-    };
+    socket.onclose = () => console.log("WebSocket bağlantısı kapatıldı.");
+    socket.onerror = (error) => console.error("WebSocket hatası:", error);
 
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    setSocket(ws);
-
-    // Cleanup on unmount
-    return () => {
-      ws.close();
-    };
+    return () => socket.close(); // Bileşen unmount edilirse bağlantıyı kapat
   }, []);
 
   return (
-    <WebSocketContext.Provider value={{ socket, data }}>
+    <WebSocketContext.Provider value={data}>
       {children}
     </WebSocketContext.Provider>
   );
 };
+
+// Default export olarak WebSocketProvider ve WebSocketContext'i ekliyoruz
+export default WebSocketProvider;
+export { WebSocketContext };

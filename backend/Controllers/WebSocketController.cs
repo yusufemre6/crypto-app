@@ -1,71 +1,39 @@
-using System.Threading.Tasks;
-using backend.Services;
-using backend.Hubs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
+using backend.Services;
+using System.Text;
+using System.Net.WebSockets;
+
 
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("/marketHub")]
     public class WebSocketController : ControllerBase
     {
-        private readonly OKXWebSocketService _webSocketService;
-        private readonly IHubContext<MarketHub> _hubContext;
+        private readonly WebSocketService _webSocketService;
 
-        public WebSocketController(OKXWebSocketService webSocketService,IHubContext<MarketHub> hubContext)
+        public WebSocketController(WebSocketService webSocketService)
         {
             _webSocketService = webSocketService;
-            _hubContext = hubContext;
         }
 
-        [HttpPost("subscribe")]
-        public async Task<IActionResult> SubscribeToTicker([FromQuery] string symbol)
+        [HttpGet]
+        public async Task Get()
         {
-            try
+            if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                // WebSocket bağlantısını yalnızca bir kez başlatıyoruz
-                if (_webSocketService.IsConnected() == false)
+                using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                Console.WriteLine("WebSocket bağlantısı kabul edildi.");
+
+                await _webSocketService.StartAsync(async (data) =>
                 {
-                    await _webSocketService.ConnectAsync();
-                }
-
-                await _webSocketService.SubscribeToTickerAsync(symbol);
-                return Ok("Subscription successful.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
-
-
-        [HttpPost("stream")]
-        public async Task<IActionResult> StreamTicker([FromQuery] string symbol)
-        {
-            try
-            {
-                // Tekrar bağlantıyı başlatmadan önce kontrol et
-                if (_webSocketService.IsConnected() == false)
-                {
-                    await _webSocketService.ConnectAsync();
-                }
-
-                // Abonelik işlemi
-                await _webSocketService.SubscribeToTickerAsync(symbol);
-
-                // Mesajları sürekli al ve SignalR ile yayınla
-                await _webSocketService.ReceiveMessagesAsync(async message =>
-                {
-                    Console.WriteLine($"SignalR'e gönderilecek mesaj: {message}");
-                    await _hubContext.Clients.All.SendAsync("ReceiveMessage", message);
+                    var bytes = Encoding.UTF8.GetBytes(data);
+                    await socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
                 });
-
-                return Ok("Streaming started.");
             }
-            catch (Exception ex)
+            else
             {
-                return BadRequest(new { error = ex.Message });
+                HttpContext.Response.StatusCode = 400;
             }
         }
     }
