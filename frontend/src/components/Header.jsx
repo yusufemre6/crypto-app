@@ -1,20 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/HeaderBar.css'; 
 
-const HeaderBar = () => {
+const Header = () => {
   return (
-    <header className="header-bar">
-      <nav className="nav-bar">
-        <ul className="nav-links">
+    <header style={{ padding: '10px', backgroundColor: '#282c34', color: 'white' }}>
+      <nav>
+        <ul style={{ listStyleType: 'none', display: 'flex', justifyContent: 'space-around' }}>
           <li>
-            <Link to="/">Ana Sayfa</Link>
+            <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Ana Sayfa</Link>
           </li>
           <li>
-            <Link to="/login">Giriş Yap</Link>
+            <Link to="/login" style={{ color: 'white', textDecoration: 'none' }}>Giriş Yap</Link>
           </li>
           <li>
-            <Link to="/register">Kayıt Ol</Link>
+            <Link to="/register" style={{ color: 'white', textDecoration: 'none' }}>Kayıt Ol</Link>
           </li>
         </ul>
       </nav>
@@ -22,4 +21,4 @@ const HeaderBar = () => {
   );
 };
 
-export default HeaderBar;
+export default Header;
