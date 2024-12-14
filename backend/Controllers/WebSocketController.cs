@@ -24,37 +24,49 @@ namespace backend.Controllers
         {
             try
             {
-                await _webSocketService.ConnectAsync();
+                // WebSocket bağlantısını yalnızca bir kez başlatıyoruz
+                if (_webSocketService.IsConnected() == false)
+                {
+                    await _webSocketService.ConnectAsync();
+                }
+
                 await _webSocketService.SubscribeToTickerAsync(symbol);
                 return Ok("Subscription successful.");
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
         }
 
+
+        [HttpPost("stream")]
         public async Task<IActionResult> StreamTicker([FromQuery] string symbol)
         {
             try
             {
-                await _webSocketService.ConnectAsync();
+                // Tekrar bağlantıyı başlatmadan önce kontrol et
+                if (_webSocketService.IsConnected() == false)
+                {
+                    await _webSocketService.ConnectAsync();
+                }
+
+                // Abonelik işlemi
                 await _webSocketService.SubscribeToTickerAsync(symbol);
 
+                // Mesajları sürekli al ve SignalR ile yayınla
                 await _webSocketService.ReceiveMessagesAsync(async message =>
                 {
+                    Console.WriteLine($"SignalR'e gönderilecek mesaj: {message}");
                     await _hubContext.Clients.All.SendAsync("ReceiveMessage", message);
                 });
 
                 return Ok("Streaming started.");
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
         }
-
     }
-
-    
 }

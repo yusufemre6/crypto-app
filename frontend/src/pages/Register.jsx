@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Header from "../components/Header";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -18,9 +19,9 @@ const Register = () => {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        email,
-        password,
+      await axios.post("http://localhost:5242/api/auth/register", {
+        "Username":email,
+        "Password":password
       });
       navigate("/login");
     } catch (err) {
@@ -30,6 +31,7 @@ const Register = () => {
 
   return (
     <div className="auth-container">
+      <Header></Header>
       <h2>Register</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleRegister}>

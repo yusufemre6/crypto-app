@@ -1,59 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import socket from "../services/websocket";
-import Modal from "../components/Modal";
+import React, { useContext } from "react";
+import { WebSocketContext } from "../context/WebSocketContext";
+import HeaderBar from "../components/Header";
 
 const Home = () => {
-  const [prices, setPrices] = useState([]); // Kripto fiyatlarını saklar
-  const [selectedSymbol, setSelectedSymbol] = useState(null); // Modal için seçili sembol
-  const [modalData, setModalData] = useState(null); // Modal detay verileri
-  const navigate = useNavigate();
-
-  // WebSocket bağlantısı kurma
-  useEffect(() => {
-    socket.on("cryptoPrices", (data) => {
-      setPrices(data);
-    });
-
-    return () => {
-      socket.off("cryptoPrices");
-    };
-  }, []);
-
-  // Bir sembol seçildiğinde modal açılır
-  const handleSymbolClick = (symbol) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    // Modal detayları için API çağrısı (WebSocket kullanarak alabilirsiniz)
-    const symbolData = prices.find((item) => item.symbol === symbol);
-    setModalData(symbolData);
-    setSelectedSymbol(symbol);
-  };
-
-  const closeModal = () => {
-    setSelectedSymbol(null);
-    setModalData(null);
-  };
+  const { data } = useContext(WebSocketContext);
 
   return (
     <div>
+      <HeaderBar></HeaderBar>
       <h1>Crypto Prices</h1>
       <ul>
-        {prices.map((price, index) => (
-          <li key={index} onClick={() => handleSymbolClick(price.symbol)}>
-            <strong>{price.symbol}</strong>: {price.lastPrice}
+        {data.map((item, index) => (
+          <li key={index}>
+            <strong>{item.symbol}</strong>: {item.price}
           </li>
         ))}
       </ul>
-
-      {/* Modal Bileşeni */}
-      {selectedSymbol && modalData && (
-        <Modal symbol={selectedSymbol} data={modalData} onClose={closeModal} />
-      )}
     </div>
   );
 };

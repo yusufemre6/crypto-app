@@ -16,10 +16,27 @@ namespace backend.Services
             _webSocket = new ClientWebSocket();
         }
 
+        public bool IsConnected()
+        {
+            return _webSocket.State == WebSocketState.Open;
+        }
+
         public async Task ConnectAsync()
         {
-            await _webSocket.ConnectAsync(new Uri(OKXWebSocketUrl), CancellationToken.None);
-            Console.WriteLine("WebSocket bağlantısı kuruldu.");
+            try
+            {
+                // Eğer WebSocket zaten bağlıysa, yeniden bağlantı kurma
+                if (_webSocket.State == WebSocketState.Open)
+                    return;
+
+                await _webSocket.ConnectAsync(new Uri(OKXWebSocketUrl), CancellationToken.None);
+                Console.WriteLine("WebSocket bağlantısı kuruldu.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WebSocket bağlantı hatası: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task SubscribeToTickerAsync(string symbol)
@@ -36,7 +53,7 @@ namespace backend.Services
             await _webSocket.SendAsync(messageBuffer, WebSocketMessageType.Text, true, CancellationToken.None);
         }
 
-        public async Task ReceiveMessagesAsync(Action<string> handleMessage)
+        public async Task ReceiveMessagesAsync(Func<string, Task> handleMessage)
         {
             var buffer = new byte[1024 * 4];
 
@@ -51,7 +68,8 @@ namespace backend.Services
                 else
                 {
                     var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    handleMessage(message);
+                    Console.WriteLine($"Gelen mesaj: {message}");
+                    await handleMessage(message);  // Async işleme
                 }
             }
         }
